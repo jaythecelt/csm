@@ -2,6 +2,7 @@
 
 ###### Imports ###########
 
+import rtdQueue
 
 import dbus
 import dbus.exceptions
@@ -291,6 +292,7 @@ class DataValueCharacteristic(Characteristic):
     """
     #DATA_VAL_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef1'
     DATA_VAL_CHRC_UUID = 'cd062ebb-e951-44eb-9f65-de08db0b6307'
+    rtdQ = None
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
@@ -298,8 +300,8 @@ class DataValueCharacteristic(Characteristic):
                 self.DATA_VAL_CHRC_UUID,
                 ['read', 'notify'],
                 service)
+        self.rtdQ = rtdQueue.RTDQueue()
         self.value = []
-#        self.value.append(dbus.Byte('T'))#,dbus.Byte('e'),dbus.Byte('e'),dbus.Byte('T'))
         self.notifying = False
 #        self.add_descriptor(DataValDescriptor(bus, 0, self))
 #        self.add_descriptor(
@@ -307,11 +309,16 @@ class DataValueCharacteristic(Characteristic):
     
     def rtd_val_cb(self):
         self.value = []
-        self.value.append(dbus.Byte(randint(90, 130)))
-        self.value.append(dbus.Byte(randint(90, 130)))
 
-        print('Updating value: ' + repr(self.value))
-        self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': self.value }, [])
+        v = self.rtdQ.get()
+
+        if v is not None:
+            bArray = bytearray(v.encode())
+            for v in bArray:
+                self.value.append(dbus.Byte(v))
+            print('Updating value: ' + repr(self.value))
+            self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': self.value }, [])
+
         return self.notifying
 
     def rtd_val_simulation(self):
@@ -458,6 +465,16 @@ def main():
                                     reply_handler=register_app_cb,
                                     error_handler=register_app_error_cb)
 
+                                    
+    rq = rtdQueue.RTDQueue()
+    rq.put('TC0174.53F')
+    rq.put('TC0175.00F')
+    rq.put('TC0176.00F')
+    rq.put('TC0177.00F')
+    rq.put('TC0178.00F')
+    rq.put('TC0179.00F')
+    rq.put('TC0180.00F')
+    rq.put('TC0181.00F')    
     mainloop.run()
 
     
