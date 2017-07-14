@@ -274,9 +274,7 @@ class RealTimeDataService(Service):
     """
     Service that provides characteristics and descriptors for 
     the test platform read time data "stream"
-
     """
-    #RTD_SVC_UUID = '12345678-1234-5678-1234-56789abcdef0'
     RTD_SVC_UUID = '79d9c22a-5c68-40d8-9d03-bc5cc58013e9'
 
     def __init__(self, bus, index):
@@ -284,8 +282,6 @@ class RealTimeDataService(Service):
         dataValChrc = DataValueCharacteristic(bus, 0, self)
         self.add_characteristic(dataValChrc)
         
-        #self.add_characteristic(TestEncryptCharacteristic(bus, 1, self))
-        #self.add_characteristic(TestSecureCharacteristic(bus, 2, self))
 
 class DataValueCharacteristic(Characteristic):
     """
@@ -302,27 +298,27 @@ class DataValueCharacteristic(Characteristic):
                 self.DATA_VAL_CHRC_UUID,
                 ['read', 'notify'],
                 service)
- #       self.value = []
+        self.value = []
+#        self.value.append(dbus.Byte('T'))#,dbus.Byte('e'),dbus.Byte('e'),dbus.Byte('T'))
         self.notifying = False
 #        self.add_descriptor(DataValDescriptor(bus, 0, self))
 #        self.add_descriptor(
 #                CharacteristicUserDescriptionDescriptor(bus, 1, self))
-                
-        GObject.timeout_add(1000, self.update_value_cb)
-        
-        self.value = 75
-        
-                
-    def update_value_cb(self):
+    
+    def rtd_val_cb(self):
+        self.value = []
+        self.value.append(dbus.Byte(randint(90, 130)))
+        self.value.append(dbus.Byte(randint(90, 130)))
+
+        print('Updating value: ' + repr(self.value))
+        self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': self.value }, [])
+        return self.notifying
+
+    def rtd_val_simulation(self):
+        print('Update RTD Simulation')
         if not self.notifying:
             return
-
-        self.value = self.value + 1
-        print('Updating value: ' + repr(self.value))
-
-        self.PropertiesChanged( 
-                GATT_CHRC_IFACE,
-                { 'Value': [dbus.Byte(self.value)] }, [])
+        GObject.timeout_add(1000, self.rtd_val_cb)
                 
 
     def ReadValue(self, options):
@@ -339,6 +335,7 @@ class DataValueCharacteristic(Characteristic):
             print('Already notifying, nothing to do')
             return
         self.notifying = True
+        self.rtd_val_simulation()
 
     def StopNotify(self):
         print('Called StopNotify')
@@ -346,7 +343,7 @@ class DataValueCharacteristic(Characteristic):
             print('Not notifying, nothing to do')
             return
         self.notifying = False
-
+        self.rtd_val_simulation()
         
         
         
