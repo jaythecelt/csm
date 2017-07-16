@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Start/Reset BLE"
+reset_ble
+echo "Start CSM"
+sudo python3 csm.py
+
