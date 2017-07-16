@@ -80,8 +80,6 @@ class Application(dbus.service.Object):
     @dbus.service.method(DBUS_OM_IFACE, out_signature='a{oa{sa{sv}}}')
     def GetManagedObjects(self):
         response = {}
-        print('GetManagedObjects')
-
         for service in self.services:
             response[service.get_path()] = service.get_properties()
             chrcs = service.get_characteristics()
@@ -290,7 +288,6 @@ class DataValueCharacteristic(Characteristic):
     Contains "extended properties", as well as a descriptor.
 
     """
-    #DATA_VAL_CHRC_UUID = '12345678-1234-5678-1234-56789abcdef1'
     DATA_VAL_CHRC_UUID = 'cd062ebb-e951-44eb-9f65-de08db0b6307'
     rtdQ = None
 
@@ -447,13 +444,6 @@ def main():
 
     app = Application(bus)
     
-    resp = app.GetManagedObjects()
-    for k,v in resp.items():
-        print("key = ",k)
-        print("val = ",v)
-        print("\n")
-    
-
     mainloop = GObject.MainLoop()
 
     print('Registering GATT application...')
@@ -463,8 +453,6 @@ def main():
                                     error_handler=register_app_error_cb)
     mainloop.run()
 
-    
-    
     
 if __name__ == '__main__':
     main()

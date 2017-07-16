@@ -10,7 +10,9 @@ import bleHandler
 from _thread import *
 
 import dipClient
+import simpleSimClient
 
+SIMPLE_SIM = True
 
 RTDATA_UPDATE_PERIOD = 3  # In seconds
 RTDATA_PRIORITY = 1
@@ -66,7 +68,12 @@ def rtDataHandler(a = 'default'):
     if (scheduleRunning): # Check prevents race condition
         curEvent = rtSched.enter(RTDATA_UPDATE_PERIOD,  RTDATA_PRIORITY, rtDataHandler)
    
-    jsonStr = dipClient.getRTData()
+   
+    if SIMPLE_SIM :
+        ssc = simpleSimClient.SimpleSimClient()
+        jsonStr = ssc.getRTData()
+    else:
+        jsonStr = dipClient.getRTData()
     
     bleHandler.updateRTData(jsonStr)
 

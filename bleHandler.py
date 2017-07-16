@@ -19,6 +19,8 @@ def queueUp(valStr):
     for v in bArray:
         value.append(dbus.Byte(v))
     rtdQ = rtdQueue.RTDQueue()
+    if rtdQ.isEnable(): 
+        print("Queuing ", valStr)
     rtdQ.put(value)
     return
 
