@@ -26,14 +26,17 @@ class RTDQueue:
     # Method implementations go here.
     class __RTDQueue:
         rtdQ = None
-
+        
         def __init__(self):
             self.rtdQ = queue.Queue(maxsize=QUEUE_MAX_SIZE)
-    
+            self.bEnable = False
+   
         def __str__(self):
             return repr(self)
         
         def put(self, v):
+            if not self.bEnable:
+                return
             try:
                 self.rtdQ.put(v, True, QUEUE_PUT_TIMEOUT)
             except (queue.Full):
@@ -41,9 +44,20 @@ class RTDQueue:
                 return
                 
         def get(self):
+            if not self.bEnable:
+                return None
             try:
                 rtn = self.rtdQ.get(True, QUEUE_GET_TIMEOUT)
             except (queue.Empty):
-                logging.warning("RTD Queue is empty, nothing to get.")
                 rtn = None
             return rtn
+
+        def enable(self):
+            self.bEnable = True
+           
+        def disable(self):
+            self.bEnable = False
+            
+        def isEnable(self):
+            return self.bEnable
+

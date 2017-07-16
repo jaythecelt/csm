@@ -6,6 +6,7 @@ Data Injection Point
 
 import json
 import sched, time
+import bleHandler
 from _thread import *
 
 import dipClient
@@ -66,8 +67,8 @@ def rtDataHandler(a = 'default'):
         curEvent = rtSched.enter(RTDATA_UPDATE_PERIOD,  RTDATA_PRIORITY, rtDataHandler)
    
     jsonStr = dipClient.getRTData()
-    print(jsonStr)
-
+    
+    bleHandler.updateRTData(jsonStr)
 
     return
 

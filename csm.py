@@ -5,11 +5,16 @@ Controller / Sequencer Module
 '''
 import json
 import time
+from gattServer import main as gattServerMainLoop
 
 from rtDataThread import startRTData, stopRTData
 
 
 startRTData()
+
+print("Entering gattServerMainLoop")
+gattServerMainLoop()
+
 
 print("Entering Loop")
 while True:
