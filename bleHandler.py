@@ -12,20 +12,31 @@ import json
 import dbus
 import rtdQueue
 import crc16
+import formulaTimer
 
 def queueUp(valStr):
     value = []
     bArray = bytearray(valStr.encode())
-    print(valStr)
+
+    # Add the elapsed time for the time stamp
+    ft = formulaTimer.FormulaTimer()
+    ftBytes = ft.getElapsedTimeBytes()
+    bArray.append(ftBytes[0])
+    bArray.append(ftBytes[1])
+    bArray.append(ftBytes[2])
+    bArray.append(ftBytes[3])
+
+    # Populate value with valueStr and time 
     for v in bArray:
         value.append(dbus.Byte(v))
         print("0x{0:x}".format(v))
     
-    # Add the CRC
+    # Calc the CRC and add to value array
     crc = crc16.calcCRC16(bArray)
     value.append(dbus.Byte(crc[0]))
     value.append(dbus.Byte(crc[1]))
-        
+
+    # Add the characteristic payload to the queue
     rtdQ = rtdQueue.RTDQueue()
     if rtdQ.isEnable(): 
         print("Queuing ", valStr)

@@ -3,6 +3,7 @@
 ###### Imports ###########
 
 import rtdQueue
+import formulaTimer
 
 import dbus
 import dbus.exceptions
@@ -336,6 +337,9 @@ class DataValueCharacteristic(Characteristic):
         self.rtdQ.enable()
         self.notifying = True
         self.rtd_poll_queue()
+        # Start the timer!
+        ft = formulaTimer.FormulaTimer()
+        ft.start()
 
     def StopNotify(self):
         print('Called StopNotify')
