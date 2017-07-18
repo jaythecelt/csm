@@ -11,13 +11,21 @@ import logging
 import json
 import dbus
 import rtdQueue
-
+import crc16
 
 def queueUp(valStr):
     value = []
     bArray = bytearray(valStr.encode())
+    print(valStr)
     for v in bArray:
         value.append(dbus.Byte(v))
+        print("0x{0:x}".format(v))
+    
+    # Add the CRC
+    crc = crc16.calcCRC16(bArray)
+    value.append(dbus.Byte(crc[0]))
+    value.append(dbus.Byte(crc[1]))
+        
     rtdQ = rtdQueue.RTDQueue()
     if rtdQ.isEnable(): 
         print("Queuing ", valStr)
