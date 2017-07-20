@@ -7,8 +7,8 @@ echo "LE on"
 sudo ~/bluez-5.45/tools/btmgmt -i hci0 le on
 echo "Connectable on"
 sudo ~/bluez-5.45/tools/btmgmt -i hci0 connectable on
-echo "Setting name to Hyperwave Test Platform"
-sudo ~/bluez-5.45/tools/btmgmt -i hci0 name "Hyperwave Test Platform"
+echo "Setting name to Hyperwave"
+sudo ~/bluez-5.45/tools/btmgmt -i hci0 name "Hyperwave"
 echo "Advertising on"
 sudo ~/bluez-5.45/tools/btmgmt -i hci0 advertising on
 sleep 3
