@@ -12,7 +12,7 @@ from _thread import *
 import dipClient
 import simpleSimClient
 
-SIMPLE_SIM = True
+SIMPLE_SIM = False
 
 RTDATA_UPDATE_PERIOD = 3  # In seconds
 RTDATA_PRIORITY = 1

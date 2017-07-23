@@ -27,56 +27,72 @@ def queueUp(valStr):
     bArray.append(ftBytes[3])
 
     # Populate value with valueStr and time 
+    printStr = ""
     for v in bArray:
         value.append(dbus.Byte(v))
-        print("0x{0:x}".format(v))
+        printStr = printStr + " 0x{0:x}".format(v)
     
     # Calc the CRC and add to value array
     crc = crc16.calcCRC16(bArray)
     value.append(dbus.Byte(crc[0]))
     value.append(dbus.Byte(crc[1]))
 
+    printStr = printStr + " 0x{0:x}".format(crc[0])
+    printStr = printStr + " 0x{0:x}".format(crc[1])
+    
     # Add the characteristic payload to the queue
     rtdQ = rtdQueue.RTDQueue()
     if rtdQ.isEnable(): 
-        print("Queuing ", valStr)
+        print("Queuing: ", valStr, "\nBytes:  ", printStr,"\n" )
+#    else:
+#        print("rtdQ not enabled!")
     rtdQ.put(value)
     return
 
 
 def updateRTData (rtDataJson):
     rtDict = json.loads(rtDataJson)
-    tcDict = rtDict['TC']
-    aiDict = rtDict['AI']
-    diDict = rtDict['DI']
     
     # Analog In
-    for k, v in aiDict.items():
-        label = '{:#<4.4}'.format(k)
-        fval = float(v[0])
-        floatStr = '{:.2f}'.format(fval)
-        units = '{:1.1}'.format(v[1])
-        valStr = label + floatStr + units
-        queueUp(valStr)
+    if 'AI' in rtDict:
+        aiDict = rtDict['AI']
+        for k, v in aiDict.items():
+            label = '{:#<4.4}'.format(k)
+            fval = float(v[0])
+            floatStr = '{:.2f}'.format(fval)
+            units = '{:1.1}'.format(v[1])
+            valStr = label + floatStr + units
+            queueUp(valStr)
         
     # Digital In
-    for k, v in diDict.items():
-        label = '{:#<4.4}'.format(k)
-        digVal = v
-        digStr = '{:1d}'.format(digVal)
-        valStr = label + digStr
-        queueUp(valStr)
+    if 'DI' in rtDict:
+        diDict = rtDict['DI']
+        for k, v in diDict.items():
+            label = '{:#<4.4}'.format(k)
+            digVal = v
+            digStr = '{:1d}'.format(digVal)
+            valStr = label + digStr
+            queueUp(valStr)
 
     # Thermocouples
-    for k, v in tcDict.items():
-        label = '{:#<4.4}'.format(k)
-        fval = float(v[0])
-        floatStr = '{:.2f}'.format(fval)
-        units = '{:1.1}'.format(v[1])
-        valStr = label + floatStr + units
-        queueUp(valStr)
+    if 'TC' in rtDict:
+        tcDict = rtDict['TC']
+        for k, v in tcDict.items():
+            label = '{:#<4.4}'.format(k)
+            fval = float(v[0])
+            floatStr = '{:.2f}'.format(fval)
+            units = '{:1.1}'.format(v[1])
+            valStr = label + floatStr + units
+            queueUp(valStr)
 
-
+    # Counters
+    if 'CT' in rtDict:
+        ctDict = rtDict['CT']
+        for k, v in ctDict.items():
+            label = '{:#<4.4}'.format(k)
+            ivalStr = str(int(v))
+            valStr = label + ivalStr
+            queueUp(valStr)
         
     return
 

@@ -25,6 +25,7 @@ from random import randint
 mainloop = None
 
 BLUEZ_SERVICE_NAME = 'org.bluez'
+BLUEZ_SERVICE_NAME = 'org.bluez'
 GATT_MANAGER_IFACE = 'org.bluez.GattManager1'
 DBUS_OM_IFACE =      'org.freedesktop.DBus.ObjectManager'
 DBUS_PROP_IFACE =    'org.freedesktop.DBus.Properties'
@@ -334,6 +335,7 @@ class DataValueCharacteristic(Characteristic):
         if self.notifying:
             print('Already notifying, nothing to do')
             return
+        print('Enabling rtdQ')
         self.rtdQ.enable()
         self.notifying = True
         self.rtd_poll_queue()

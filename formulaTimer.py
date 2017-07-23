@@ -54,7 +54,7 @@ class FormulaTimer(object):
         def getElapsedTime(self):
             now = time.time()
             if self.startTime==None:
-                logging.warning("FormulaTimer timer not started.")
+                #logging.warning("FormulaTimer timer not started.")
                 return None
             now = now * 1000.0  # Convert to ms
             return now - self.startTime
