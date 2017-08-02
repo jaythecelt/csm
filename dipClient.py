@@ -3,11 +3,11 @@ Data Injection Point Client Module
 
 '''
 import socket
+import rtDataThread
 
 
-
-#HOST = '192.168.1.110'
-HOST = '10.0.2.2'
+HOST = '192.168.1.110'
+#HOST = '10.0.2.2'
 PORT = 5560
 HDR_LEN = 5   # Message header length
 RT_CMD = "RT"
@@ -40,6 +40,8 @@ def receiveMessage():
 
 
 def getRTData():
+    if rtDataThread.SIMPLE_SIM:
+        return
     initSocket()
     sendMessage(RT_CMD)
     jsonPayload = receiveMessage()

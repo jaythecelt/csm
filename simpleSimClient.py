@@ -49,19 +49,26 @@ class SimpleSimClient:
             # Dictionaries to hold data
             rtData = {} # all data elements
             tcData = {} # thermocouple data
+            hmData = {} # humidity data
             aiData = {} # analog input data
             diData = {} # digital input data
 
             # Thermocouples
             for k, v in simConfigData.tcConfig.items():
                 j = self.readTCChannel(v)
-                if j:
+                if j is not None:
                     tcData[k] = j
 
+            # Humidity Sensors
+            for k, v in simConfigData.hmConfig.items():
+                j = self.readHMChannel(v)
+                if j is not None:
+                    hmData[k] = j
+                    
             # Analog Inputs
             for k, v in simConfigData.analogInConfig.items():
                 j = self.readAIChannel(v)
-                if j:
+                if j is not None:
                     aiData[k] = j
 
             # Digital Inputs
@@ -70,9 +77,14 @@ class SimpleSimClient:
                 if j is not None:
                     diData[k] = j
 
-            rtData['TC'] = tcData
-            rtData['AI'] = aiData
-            rtData['DI'] = diData
+            if len(tcData) > 0: 
+                rtData['TC'] = tcData
+            if len(hmData) > 0: 
+                rtData['HM'] = hmData
+            if len(aiData) > 0: 
+                rtData['AI'] = aiData
+            if len(diData) > 0: 
+                rtData['DI'] = diData
            
             return rtData
 
@@ -90,6 +102,19 @@ class SimpleSimClient:
             rtn = val, units
             return rtn                
 
+        def readHMChannel(self, v):
+            val = v[0]
+            rndm = v[1]
+            mute = v[2]
+            if mute:
+                return None
+            if rndm:
+                val = val + int(random.random() * 10000)
+            rtn = val
+            return rtn                
+            
+            
+            
         def readAIChannel(self, v):
             val = v[0]
             rndm = v[1]

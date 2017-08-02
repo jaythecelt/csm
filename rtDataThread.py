@@ -27,6 +27,11 @@ def startRTData():
     global curEvent
     global rtSched
 
+    if SIMPLE_SIM:
+        print("=== Using simulated data. ===")
+    else:
+        print("=== Using real time data. ===")
+    
     rtSched = sched.scheduler(time.time, time.sleep)
     curEvent = rtSched.enter(RTDATA_UPDATE_PERIOD,  RTDATA_PRIORITY, rtDataHandler)
     start_new_thread(rtThread, ())
@@ -72,6 +77,7 @@ def rtDataHandler(a = 'default'):
     if SIMPLE_SIM :
         ssc = simpleSimClient.SimpleSimClient()
         jsonStr = ssc.getRTData()
+        print(jsonStr)
     else:
         jsonStr = dipClient.getRTData()
     

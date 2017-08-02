@@ -25,7 +25,6 @@ from random import randint
 mainloop = None
 
 BLUEZ_SERVICE_NAME = 'org.bluez'
-BLUEZ_SERVICE_NAME = 'org.bluez'
 GATT_MANAGER_IFACE = 'org.bluez.GattManager1'
 DBUS_OM_IFACE =      'org.freedesktop.DBus.ObjectManager'
 DBUS_PROP_IFACE =    'org.freedesktop.DBus.Properties'
@@ -77,6 +76,7 @@ class Application(dbus.service.Object):
         return dbus.ObjectPath(self.path)
 
     def add_service(self, service):
+        print("Adding service: " + str(service))
         self.services.append(service)
 
     @dbus.service.method(DBUS_OM_IFACE, out_signature='a{oa{sa{sv}}}')
@@ -302,9 +302,10 @@ class DataValueCharacteristic(Characteristic):
         self.rtdQ = rtdQueue.RTDQueue()
         self.value = []
         self.notifying = False
-#        self.add_descriptor(DataValDescriptor(bus, 0, self))
+        print("init characteristic ... notifying = ", self.notifying)
+#        self.add_descriptor(RTDCharacteristicDataDeclaration(bus, 0, self))
 #        self.add_descriptor(
-#                CharacteristicUserDescriptionDescriptor(bus, 1, self))
+#                RTDClientCharacteristicConfigurationDescriptor(bus, 0, self))
     
     def rtd_val_cb(self):
         while True:
@@ -317,7 +318,6 @@ class DataValueCharacteristic(Characteristic):
         return self.notifying
 
     def rtd_poll_queue(self):
-        print('Call rtd_poll_data')
         if not self.notifying:
             return
         GObject.timeout_add(1000, self.rtd_val_cb)
@@ -352,7 +352,63 @@ class DataValueCharacteristic(Characteristic):
         self.notifying = False
         self.rtd_poll_queue()
         
-        
+
+
+
+class RTDCharacteristicDataDeclaration(Descriptor):
+    """
+    Characteristic Data Declaration Descriptor for the DataValueCharacteristic.
+
+    """
+    CDDD_DESC_UUID = '531eeeb5-ad9d-41c3-9fc7-3aaf27bb3263'
+
+    def __init__(self, bus, index, characteristic):
+        Descriptor.__init__(
+                self, bus, index,
+                self.CDDD_DESC_UUID,
+                ['notify'],
+                characteristic)
+
+    def ReadValue(self, options):
+        print("ReadValue in RTDCharacteristicDataDeclaration")
+        value = []
+        bArray = bytearray('cd062ebb-e951-44eb-9f65-de08db0b6307')
+        for v in bArray:
+            value.append(dbus.Byte(v))
+        return value
+
+class RTDClientCharacteristicConfigurationDescriptor(Descriptor):
+    """
+    CCCD descriptor.
+
+    """
+    CCCD_UUID = '2902'
+
+    def __init__(self, bus, index, characteristic):
+        self.value = []
+        # 16 bit value to indicate notifications are enabled.
+        self.value.append(dbus.Byte(0))
+        self.value.append(dbus.Byte(1))
+        self.writable = True
+        Descriptor.__init__(
+                self, bus, index,
+                self.CCCD_UUID,
+                ['read', 'write'],
+                characteristic)
+
+    def ReadValue(self, options):
+        print("ReadValue in CCCD ... RTDClientCharacteristicConfigurationDescriptor")
+        return self.value
+
+    def WriteValue(self, value, options):
+        print("Write Value in CCCD ... ", str(value))
+        if not self.writable:
+            raise NotPermittedException()
+        self.value = value
+
+############################################################################
+
+
         
 class DataValDescriptor(Descriptor):
     """

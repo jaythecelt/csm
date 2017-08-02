@@ -57,41 +57,50 @@ def updateRTData (rtDataJson):
     if 'AI' in rtDict:
         aiDict = rtDict['AI']
         for k, v in aiDict.items():
-            label = '{:#<4.4}'.format(k)
+            label = '{:<3.3}'.format(k)
             fval = float(v[0])
-            floatStr = '{:.2f}'.format(fval)
+            floatStr = '{:06.2f}'.format(fval)
             units = '{:1.1}'.format(v[1])
-            valStr = label + floatStr + units
+            valStr = 'V' + label + floatStr + units
             queueUp(valStr)
         
     # Digital In
     if 'DI' in rtDict:
         diDict = rtDict['DI']
         for k, v in diDict.items():
-            label = '{:#<4.4}'.format(k)
+            label = '{:<3.3}'.format(k)
             digVal = v
             digStr = '{:1d}'.format(digVal)
-            valStr = label + digStr
+            valStr = 'D' + label + digStr
             queueUp(valStr)
 
     # Thermocouples
     if 'TC' in rtDict:
         tcDict = rtDict['TC']
         for k, v in tcDict.items():
-            label = '{:#<4.4}'.format(k)
+            label = '{:<3.3}'.format(k)
             fval = float(v[0])
-            floatStr = '{:.2f}'.format(fval)
+            floatStr = '{:07.2f}'.format(fval)
             units = '{:1.1}'.format(v[1])
-            valStr = label + floatStr + units
+            valStr = 'T' + label + floatStr + units
             queueUp(valStr)
 
+    # Humidity Sensors
+    if 'HM' in rtDict:
+        hmDict = rtDict['HM']
+        for k, v in hmDict.items():
+            label = '{:<3.3}'.format(k)
+            ivalStr = '{:06d}'.format(v)
+            valStr = 'H' + label + ivalStr
+            queueUp(valStr)
+            
     # Counters
     if 'CT' in rtDict:
         ctDict = rtDict['CT']
         for k, v in ctDict.items():
-            label = '{:#<4.4}'.format(k)
-            ivalStr = str(int(v))
-            valStr = label + ivalStr
+            label = '{:<3.3}'.format(k)
+            ivalStr = '{:08d}'.format(v)
+            valStr = 'C' + label + ivalStr
             queueUp(valStr)
         
     return
