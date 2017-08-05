@@ -332,21 +332,24 @@ class DataValueCharacteristic(Characteristic):
 
     def StartNotify(self):
         print('Called StartNotify!')
+        ft = formulaTimer.FormulaTimer()
+        ft.reset()
         if self.notifying:
-            print('Already notifying, nothing to do')
+            print('Notifications were previously enabled.')
             return
         print('Enabling rtdQ')
         self.rtdQ.enable()
         self.notifying = True
         self.rtd_poll_queue()
         # Start the timer!
-        ft = formulaTimer.FormulaTimer()
         ft.start()
 
     def StopNotify(self):
         print('Called StopNotify')
+        ft = formulaTimer.FormulaTimer()
+        ft.stop()
         if not self.notifying:
-            print('Not notifying, nothing to do')
+            print('Notifications were previously  notifying, nothing to do')
             return
         self.rtdQ.disable()
         self.notifying = False

@@ -15,6 +15,10 @@ import random
 import simConfigData
 
 
+global SIMPLE
+SIMPLE = "simple"
+
+
 class SimpleSimClient:
     instance = None
     

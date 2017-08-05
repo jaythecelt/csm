@@ -2,5 +2,11 @@
 echo "Start/Reset BLE"
 reset_ble
 echo "Start CSM"
-sudo python3 csm.py
+sudo python3 ~/csm/csm.py $1 $2 $3 $4
+
+
+
+
+
+
 

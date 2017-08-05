@@ -12,7 +12,9 @@ from _thread import *
 import dipClient
 import simpleSimClient
 
-SIMPLE_SIM = False
+simType = None
+externalData = False
+dataServerIp = None
 
 RTDATA_UPDATE_PERIOD = 3  # In seconds
 RTDATA_PRIORITY = 1
@@ -23,15 +25,23 @@ curEvent = None
 '''
     Starts the real time data update to the Data Injection Point.
 '''
-def startRTData():
+def startRTData(_externalData, _simType, _dataServerIp):
     global curEvent
     global rtSched
+    global simType
+    global externalData
+    global dataServerIp
 
-    if SIMPLE_SIM:
-        print("=== Using simulated data. ===")
-    else:
-        print("=== Using real time data. ===")
+    externalData = _externalData
+    simType = _simType
+    dataServerIp = _dataServerIp
     
+    if externalData:
+        print("=== Using real time data. ===")
+    else:
+        simType = simpleSimClient.SIMPLE
+        print("=== Using simulated data. ===")
+
     rtSched = sched.scheduler(time.time, time.sleep)
     curEvent = rtSched.enter(RTDATA_UPDATE_PERIOD,  RTDATA_PRIORITY, rtDataHandler)
     start_new_thread(rtThread, ())
@@ -66,20 +76,20 @@ def rtDataHandler(a = 'default'):
     #TODO: Add error handling
     global curEvent
     global rtSched
+    global simType
     #TODO Need more accurate way to schedule next event.... this way adds about 
     #     10ms per invocation.
     
     # Schedule new event, if still running
     if (scheduleRunning): # Check prevents race condition
         curEvent = rtSched.enter(RTDATA_UPDATE_PERIOD,  RTDATA_PRIORITY, rtDataHandler)
-   
-   
-    if SIMPLE_SIM :
+  
+    if simType == simpleSimClient.SIMPLE:
         ssc = simpleSimClient.SimpleSimClient()
         jsonStr = ssc.getRTData()
         print(jsonStr)
     else:
-        jsonStr = dipClient.getRTData()
+        jsonStr = dipClient.getRTData(dataServerIp)
     
     bleHandler.updateRTData(jsonStr)
 

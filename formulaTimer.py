@@ -51,6 +51,14 @@ class FormulaTimer(object):
         def start(self):
             self.startTime = time.time() * 1000.0
             
+        def reset(self):
+            print("Reset the elapsed time.")
+            self.startTime = time.time() * 1000.0
+            
+        def stop(self):
+            print("Stoppedthe elapsed time.")
+            self.startTime = None
+            
         def getElapsedTime(self):
             now = time.time()
             if self.startTime==None:

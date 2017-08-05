@@ -6,17 +6,17 @@ import socket
 import rtDataThread
 
 
-HOST = '192.168.1.110'
+DEF_HOST = '192.168.1.110'
 #HOST = '10.0.2.2'
 PORT = 5560
 HDR_LEN = 5   # Message header length
 RT_CMD = "RT"
 
 
-def initSocket():
+def initSocket(_host):
     global skt
     skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    skt.connect((HOST, PORT))
+    skt.connect((_host, PORT))
     return
     
 
@@ -39,10 +39,10 @@ def receiveMessage():
     return payload
 
 
-def getRTData():
-    if rtDataThread.SIMPLE_SIM:
-        return
-    initSocket()
+def getRTData(_host):
+    if _host == None:
+        _host = DEF_HOST
+    initSocket(_host)
     sendMessage(RT_CMD)
     jsonPayload = receiveMessage()
     print("Rvcd: ", jsonPayload)
