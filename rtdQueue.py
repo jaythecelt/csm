@@ -3,8 +3,8 @@ Real Time Data Queue
 
 The class is designed as a Singleton
 '''
-import logging
 import queue
+from HtpLogger import HtpLogger
 
 QUEUE_MAX_SIZE = 10
 QUEUE_PUT_TIMEOUT = 0.002
@@ -12,10 +12,12 @@ QUEUE_GET_TIMEOUT = 0.002
 
 class RTDQueue:
     instance = None
+    lg = None
     
     def __init__(self):
         if not RTDQueue.instance:
             RTDQueue.instance = RTDQueue.__RTDQueue()
+        self.log = HtpLogger.get()
 
     # Proxy for inner class
     def __getattr__(self, name):
@@ -40,7 +42,7 @@ class RTDQueue:
             try:
                 self.rtdQ.put(v, True, QUEUE_PUT_TIMEOUT)
             except (queue.Full):
-                logging.warning("RTD Queue is full, value dropped: " + str(v))
+                self.log.warning("RTD Queue is full, value dropped: " + str(v))
                 return
                 
         def get(self):

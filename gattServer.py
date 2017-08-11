@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-###### Imports ###########
+###### Imports ########### 
 
 import rtdQueue
 import formulaTimer
@@ -11,14 +11,15 @@ import dbus.mainloop.glib
 import dbus.service
 
 import array
+import sys
+from random import randint
 
 try:
   from gi.repository import GObject
 except ImportError:
   import gobject as GObject
-import sys
 
-from random import randint
+from HtpLogger import HtpLogger
 
 
 ###### Vars and constants ###########
@@ -61,10 +62,13 @@ class FailedException(dbus.exceptions.DBusException):
 ####### GATT Interface Implementations  ###############
 
 class Application(dbus.service.Object):
+    log = None
+
     """
     org.bluez.GattApplication1 interface implementation
     """
     def __init__(self, bus):
+        self.log = HtpLogger.get()
         self.path = '/'
         self.services = []
         dbus.service.Object.__init__(self, bus, self.path)
@@ -76,7 +80,7 @@ class Application(dbus.service.Object):
         return dbus.ObjectPath(self.path)
 
     def add_service(self, service):
-        print("Adding service: " + str(service))
+        self.log.info("Adding service: %s", str(service))
         self.services.append(service)
 
     @dbus.service.method(DBUS_OM_IFACE, out_signature='a{oa{sa{sv}}}')
@@ -145,10 +149,13 @@ class Service(dbus.service.Object):
 
 
 class Characteristic(dbus.service.Object):
+    log = None
+
     """
     org.bluez.GattCharacteristic1 interface implementation
     """
     def __init__(self, bus, index, uuid, flags, service):
+        self.log = HtpLogger.get()
         self.path = service.path + '/char' + str(index)
         self.bus = bus
         self.uuid = uuid
@@ -197,22 +204,22 @@ class Characteristic(dbus.service.Object):
                         in_signature='a{sv}',
                         out_signature='ay')
     def ReadValue(self, options):
-        print('Default ReadValue called, returning error')
+        self.log.error('Default ReadValue called, returning error')
         raise NotSupportedException()
 
     @dbus.service.method(GATT_CHRC_IFACE, in_signature='aya{sv}')
     def WriteValue(self, value, options):
-        print('Default WriteValue called, returning error')
+        self.log.error('Default WriteValue called, returning error')
         raise NotSupportedException()
 
     @dbus.service.method(GATT_CHRC_IFACE)
     def StartNotify(self):
-        print('Default StartNotify called, returning error')
+        self.log.error('Default StartNotify called, returning error')
         raise NotSupportedException()
 
     @dbus.service.method(GATT_CHRC_IFACE)
     def StopNotify(self):
-        print('Default StopNotify called, returning error')
+        self.log.error('Default StopNotify called, returning error')
         raise NotSupportedException()
 
     @dbus.service.signal(DBUS_PROP_IFACE,
@@ -222,10 +229,12 @@ class Characteristic(dbus.service.Object):
 
 
 class Descriptor(dbus.service.Object):
+    log = None
     """
     org.bluez.GattDescriptor1 interface implementation
     """
     def __init__(self, bus, index, uuid, flags, characteristic):
+        self.log = HtpLogger.get()
         self.path = characteristic.path + '/desc' + str(index)
         self.bus = bus
         self.uuid = uuid
@@ -258,12 +267,12 @@ class Descriptor(dbus.service.Object):
                         in_signature='a{sv}',
                         out_signature='ay')
     def ReadValue(self, options):
-        print ('Default ReadValue called, returning error')
+        self.log.error ('Default ReadValue called, returning error')
         raise NotSupportedException()
 
     @dbus.service.method(GATT_DESC_IFACE, in_signature='aya{sv}')
     def WriteValue(self, value, options):
-        print('Default WriteValue called, returning error')
+        self.log.error('Default WriteValue called, returning error')
         raise NotSupportedException()
 
 
@@ -285,6 +294,7 @@ class RealTimeDataService(Service):
         
 
 class DataValueCharacteristic(Characteristic):
+    log = None
     """
     Data Value characteristic the holds a real time value from the test platform
     Contains "extended properties", as well as a descriptor.
@@ -294,6 +304,7 @@ class DataValueCharacteristic(Characteristic):
     rtdQ = None
 
     def __init__(self, bus, index, service):
+        log = HtpLogger.get()
         Characteristic.__init__(
                 self, bus, index,
                 self.DATA_VAL_CHRC_UUID,
@@ -302,7 +313,7 @@ class DataValueCharacteristic(Characteristic):
         self.rtdQ = rtdQueue.RTDQueue()
         self.value = []
         self.notifying = False
-        print("init characteristic ... notifying = ", self.notifying)
+        self.log.debug("init characteristic ... notifying = %s", self.notifying)
 #        self.add_descriptor(RTDCharacteristicDataDeclaration(bus, 0, self))
 #        self.add_descriptor(
 #                RTDClientCharacteristicConfigurationDescriptor(bus, 0, self))
@@ -323,21 +334,21 @@ class DataValueCharacteristic(Characteristic):
         GObject.timeout_add(1000, self.rtd_val_cb)
 
     def ReadValue(self, options):
-        print('DataValueCharacteristic Read: ' + repr(self.value))
+        self.log.debug('DataValueCharacteristic Read: ' + repr(self.value))
         return self.value
 
     def WriteValue(self, value, options):
-        print('DataValueCharacteristic Write: ' + repr(value))
+        self.log.debug('DataValueCharacteristic Write: ' + repr(value))
         self.value = value
 
     def StartNotify(self):
-        print('Called StartNotify!')
+        self.log.debug('Called StartNotify!')
         ft = formulaTimer.FormulaTimer()
         ft.reset()
         if self.notifying:
-            print('Notifications were previously enabled.')
+            self.log.debug('Notifications were previously enabled.')
             return
-        print('Enabling rtdQ')
+        self.log.debug('Enabling rtdQ')
         self.rtdQ.enable()
         self.notifying = True
         self.rtd_poll_queue()
@@ -345,11 +356,11 @@ class DataValueCharacteristic(Characteristic):
         ft.start()
 
     def StopNotify(self):
-        print('Called StopNotify')
+        self.log.debug('Called StopNotify')
         ft = formulaTimer.FormulaTimer()
         ft.stop()
         if not self.notifying:
-            print('Notifications were previously  notifying, nothing to do')
+            self.log.debug('Notifications were previously  notifying, nothing to do')
             return
         self.rtdQ.disable()
         self.notifying = False
@@ -381,6 +392,7 @@ class RTDCharacteristicDataDeclaration(Descriptor):
         return value
 
 class RTDClientCharacteristicConfigurationDescriptor(Descriptor):
+    log = None
     """
     CCCD descriptor.
 
@@ -388,6 +400,7 @@ class RTDClientCharacteristicConfigurationDescriptor(Descriptor):
     CCCD_UUID = '2902'
 
     def __init__(self, bus, index, characteristic):
+        self.log = HtpLogger.get()
         self.value = []
         # 16 bit value to indicate notifications are enabled.
         self.value.append(dbus.Byte(0))
@@ -400,11 +413,11 @@ class RTDClientCharacteristicConfigurationDescriptor(Descriptor):
                 characteristic)
 
     def ReadValue(self, options):
-        print("ReadValue in CCCD ... RTDClientCharacteristicConfigurationDescriptor")
+        self.log.debug("ReadValue in CCCD ... RTDClientCharacteristicConfigurationDescriptor")
         return self.value
 
     def WriteValue(self, value, options):
-        print("Write Value in CCCD ... ", str(value))
+        self.log.debug("Write Value in CCCD ... ", str(value))
         if not self.writable:
             raise NotPermittedException()
         self.value = value
@@ -465,11 +478,11 @@ class CharacteristicUserDescriptionDescriptor(Descriptor):
 ############################        
         
 def register_app_cb():
-    print('GATT application registered')
+    HtpLogger.get().info('GATT application registered')
 
 
 def register_app_error_cb(error):
-    print('Failed to register application: ' + str(error))
+    HtpLogger.get().critical('Failed to register application: %s', error)
     mainloop.quit()
 
 
@@ -500,7 +513,7 @@ def main():
 
     adapter = find_adapter(bus)
     if not adapter:
-        print('GattManager1 interface not found')
+        HtpLogger.get().critical('GattManager1 interface not found')
         return
 
     service_manager = dbus.Interface(
@@ -511,7 +524,7 @@ def main():
     
     mainloop = GObject.MainLoop()
 
-    print('Registering GATT application...')
+    HtpLogger.get().info('Registering GATT application...')
 
     service_manager.RegisterApplication(app.get_path(), {},
                                     reply_handler=register_app_cb,

@@ -12,6 +12,10 @@ from _thread import *
 import dipClient
 import simpleSimClient
 
+from HtpLogger import HtpLogger
+
+log = HtpLogger.get()
+
 simType = None
 externalData = False
 dataServerIp = None
@@ -37,10 +41,10 @@ def startRTData(_externalData, _simType, _dataServerIp):
     dataServerIp = _dataServerIp
     
     if externalData:
-        print("=== Using real time data. ===")
+        log.info("=== Using real time data. ===")
     else:
         simType = simpleSimClient.SIMPLE
-        print("=== Using simulated data. ===")
+        log.info("=== Using simulated data. ===")
 
     rtSched = sched.scheduler(time.time, time.sleep)
     curEvent = rtSched.enter(RTDATA_UPDATE_PERIOD,  RTDATA_PRIORITY, rtDataHandler)
@@ -64,7 +68,7 @@ def  rtThread():
     #Blocks while the schedule is running
     rtSched.run()
     scheduleRunning = False
-    print("rtThread stopped")
+    log.warning("rtThread stopped")
     return
 
 
@@ -87,7 +91,7 @@ def rtDataHandler(a = 'default'):
     if simType == simpleSimClient.SIMPLE:
         ssc = simpleSimClient.SimpleSimClient()
         jsonStr = ssc.getRTData()
-        print(jsonStr)
+        log.info(jsonStr)
     else:
         jsonStr = dipClient.getRTData(dataServerIp)
     

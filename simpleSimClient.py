@@ -7,10 +7,10 @@ DIP socke and instead is called form csm.py.
 The class is designed as a Singleton
 '''
 
-import logging
 import queue
 import json
 import random
+from HtpLogger import HtpLogger
 
 import simConfigData
 
@@ -21,10 +21,12 @@ SIMPLE = "simple"
 
 class SimpleSimClient:
     instance = None
+    log = None
     
     def __init__(self):
         if not SimpleSimClient.instance:
             SimpleSimClient.instance = SimpleSimClient.__SimpleSimClient()
+        self.log = HtpLogger.get()
 
     # Proxy for inner class
     def __getattr__(self, name):

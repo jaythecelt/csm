@@ -1,20 +1,44 @@
 #!/bin/bash
-echo "===Resetting BLE ==="
-echo "Power off ble"
+
+echo "=== Reset / Restart BLE ==="
+echo "==========================="
+echo "How to: "
+echo "  $ reset_ble restart  # Restart the BLE device "
+echo
+echo "  $ reset_ble          # Reset the BLE device (no arguments) "
+echo
+echo
+
+if [ "$1" == "restart" ]
+then
+   echo "Restarting BLE ----"
+   sudo systemctl stop bluetooth
+   sleep 3
+   sudo systemctl start bluetooth
+   sleep 3
+   sudo systemctl status bluetooth
+   echo ""
+   echo "Done."
+   exit
+fi
+
+echo "Resetting BLE ----"
+echo "  Power off ble"
 sudo ~/bluez-5.45/tools/btmgmt -i hci0 power off
 sleep 3
-echo "LE on"
+echo "  LE on"
 sudo ~/bluez-5.45/tools/btmgmt -i hci0 le on
-echo "Connectable on"
+echo "  Connectable on"
 sudo ~/bluez-5.45/tools/btmgmt -i hci0 connectable on
-echo "Setting name to Hyperwave"
+echo "  Setting name to Hyperwave Test Platform"
 sudo ~/bluez-5.45/tools/btmgmt -i hci0 name "Hyperwave"
-echo "Advertising on"
+echo "  Advertising on"
 sudo ~/bluez-5.45/tools/btmgmt -i hci0 advertising on
 sleep 3
-echo "Power On"
+echo "  Power On"
 sudo ~/bluez-5.45/tools/btmgmt -i hci0 power on
 sleep 3
-echo "Status"
+echo "  Status"
 systemctl status bluetooth
 echo "Done."
+

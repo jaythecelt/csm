@@ -13,6 +13,11 @@ import dbus
 import rtdQueue
 import crc16
 import formulaTimer
+from HtpLogger import HtpLogger
+
+
+log = HtpLogger.get()
+
 
 def queueUp(valStr):
     value = []
@@ -43,9 +48,7 @@ def queueUp(valStr):
     # Add the characteristic payload to the queue
     rtdQ = rtdQueue.RTDQueue()
     if rtdQ.isEnable(): 
-        print("Queuing: ", valStr, "\nBytes:  ", printStr,"\n" )
-#    else:
-#        print("rtdQ not enabled!")
+        log.debug("Queuing: %s\nBytes: %s\n", valStr, printStr )
     rtdQ.put(value)
     return
 

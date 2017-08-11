@@ -21,18 +21,18 @@
 
 '''
 import time
-import logging
-from logging import _startTime
-
+from HtpLogger import HtpLogger
 
 # TODO Catch exceptions around number formatting and timer overruns
 # TODO Possible generate exception when reading time without starting timer
 
 
 class FormulaTimer(object):
+    log = None
     instance = None
 
     def __init__(self):
+        log = HtpLogger.get()
         if not FormulaTimer.instance:
             FormulaTimer.instance = FormulaTimer.__FormulaTimer()
             
@@ -52,7 +52,7 @@ class FormulaTimer(object):
             self.startTime = time.time() * 1000.0
             
         def reset(self):
-            print("Reset the elapsed time.")
+            log.info("Reset the elapsed time.")
             self.startTime = time.time() * 1000.0
             
         def stop(self):
@@ -62,7 +62,7 @@ class FormulaTimer(object):
         def getElapsedTime(self):
             now = time.time()
             if self.startTime==None:
-                #logging.warning("FormulaTimer timer not started.")
+                #log.warning("FormulaTimer timer not started.")
                 return None
             now = now * 1000.0  # Convert to ms
             return now - self.startTime
