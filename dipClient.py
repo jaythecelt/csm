@@ -46,7 +46,7 @@ def getRTData(_host):
     initSocket(_host)
     sendMessage(RT_CMD)
     jsonPayload = receiveMessage()
-    log.debug("Rvcd: ", jsonPayload)
+    log.debug("Rvcd: {0}".format(jsonPayload))
     return jsonPayload
     
 
